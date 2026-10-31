@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <script src="auth.js"></script>
+    <script>
+  // 🚧 同步维护模式开关：与 auth.js 中的值保持一致
+  const MAINTENANCE_MODE = false; 
+  if (MAINTENANCE_MODE) {
+    window.location.replace('/maintenance.html');
+  }
+    </script>
     <title>王茂钢打飞机大作战</title>
     <style>
         * {
