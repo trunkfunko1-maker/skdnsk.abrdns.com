@@ -1,13 +1,27 @@
-// 严格防偷窥：如果是新开的标签页，强制清除登录状态
-if (!sessionStorage.getItem('tab_active')) {
-    sessionStorage.setItem('tab_active', '1');
-    // 清除 Cloudflare 的 Cookie
-    document.cookie = "site_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    // 如果当前不是登录页（实际上 Cloudflare 已经放行网页了），直接刷新让 Cloudflare 重新拦截
-    if (!window.location.pathname.includes('__login')) {
-        window.location.reload();
+(function() {
+    // 🚪 核心：判断是否是新开的网页（新标签页）
+    // sessionStorage 仅在当前标签页生效，关掉网页/标签页就会清空
+    if (!sessionStorage.getItem('site_auth_active')) {
+        if (window.location.search.includes('logged_in=1')) {
+            // 如果是刚登录成功跳转过来的，打上已登录标记，并把网址还原
+            sessionStorage.setItem('site_auth_active', '1');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } else if (!window.location.search.includes('logout=1')) {
+            // 如果是新开的网页，且不是正在退登，强制去请求后端清除 Cookie 并踢出
+            window.location.replace('/?logout=1');
+            return; 
+        }
     }
-}
+
+    // ---- 下面是你原本的 UI 渲染逻辑，保持不变 ----
+    const EXCLUDED_GAMES = ["game", "tetris", "snake"];
+    const currentPath = window.location.pathname.toLowerCase();
+    const isGame = EXCLUDED_GAMES.some(g => currentPath.includes(g));
+    if (isGame) return;
+
+    const MYSTERIOUS_THEME_CSS = `...你原本的 CSS 代码...`;
+
+    // ... (后面全部保持原样)
 // auth.js - 纯展示层脚本（无密码校验，密码在 Functions 层处理）
 (function() {
     // 🛠️ 修复：Cloudflare 会去掉 .html 后缀，所以去掉后缀来匹配 game
