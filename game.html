@@ -4,13 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <script src="auth.js"></script>
-    <script>
-  // 🚧 同步维护模式开关：与 auth.js 中的值保持一致
-  const MAINTENANCE_MODE = false; 
-  if (MAINTENANCE_MODE) {
-    window.location.replace('/maintenance.html');
-  }
-    </script>
     <title>王茂钢打飞机大作战</title>
     <style>
         * {
@@ -399,10 +392,10 @@
         setTimeout(resizeCanvas, 50); 
     }
 
-    const ENEMY_ALIVE_SRC = 'https://i.ibb.co/PG22J8FX/Screenshot-20260517-004026-edit-580395464196329.png'; 
-    const ENEMY_HIT_SRC = 'https://i.ibb.co/F4jXTCjw/retouch-2026051701391671.png';   
-    const ENEMY_SPECIAL_SRC = 'https://i.ibb.co/6JL1y2FC/Screenshot-20260517-151827.png'; 
-    const ENEMY_SPECIAL_HIT_SRC = 'https://i.ibb.co/4b1bxb3/Screenshot-20260517-152843.png'; 
+    const ENEMY_ALIVE_SRC = 'https://res.cloudinary.com/dnbixfto5/image/upload/v1793541412/Screenshot-20260517-004026-edit-580395464196329_hvnjzz.png'; 
+    const ENEMY_HIT_SRC = 'https://res.cloudinary.com/dnbixfto5/image/upload/v1793541413/retouch-2026051701391671_zaqym5.png';   
+    const ENEMY_SPECIAL_SRC = 'https://res.cloudinary.com/dnbixfto5/image/upload/v1793541412/Screenshot-20260517-151827_leriio.png'; 
+    const ENEMY_SPECIAL_HIT_SRC = 'https://res.cloudinary.com/dnbixfto5/image/upload/v1793541413/Screenshot-20260517-152843_qqtndf.png'; 
 
     const imgAlive = new Image(); imgAlive.src = ENEMY_ALIVE_SRC;
     const imgHit = new Image(); imgHit.src = ENEMY_HIT_SRC;
@@ -879,33 +872,4 @@
         
         document.getElementById('mobile-controller').style.display = 'none';
 
-        keys.left = false; keys.right = false; keys.up = false; keys.down = false;
-
-        const titleElement = document.getElementById('overlay-title');
-        const descElement = document.getElementById('overlay-desc');
-        document.getElementById('selector-box').style.display = 'flex'; 
-        
-        titleElement.classList.remove('success-title', 'bomb-title');
-
-        if (reason === 'bomb') {
-            titleElement.classList.add('bomb-title'); 
-            titleElement.innerHTML = "炸弹爆炸<br>全军覆没！";
-            descElement.innerHTML = `你误击了高危炸弹肛毛！<br>剧烈连锁爆炸已将你连同战机彻底湮灭！`;
-        } else if (reason === 'hit') {
-            titleElement.innerHTML = "战机坠毁<br>游戏结束！";
-            descElement.innerHTML = `很遗憾，你被肛毛撞击坠毁了！💤<br><br>最终斩获积分：<span style="color:#fff200; font-weight:bold;">${score}</span> 分`;
-        } else {
-            titleElement.classList.add('success-title'); 
-            titleElement.innerHTML = "时间到<br>完美生还！";
-            descElement.innerHTML = `恭喜你在猛烈攻势下撑过了 30 秒！🏆<br><br>最终统计算分：<span style="color:#fff200; font-weight:bold;">${score}</span> 分`;
-        }
-        
-        document.getElementById('start-btn').innerText = "再次挑战";
-        document.getElementById('overlay').style.display = 'flex';
-        setTimeout(resizeCanvas, 50); 
-    }
-
-    switchMode('mobile');
-</script>
-</body>
-</html>
+        keys.left = false; keys
