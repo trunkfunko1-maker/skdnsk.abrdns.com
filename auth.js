@@ -1,9 +1,12 @@
-// auth.js - 完整 UI 样式与导航注入（无密码校验，密码在 Functions 层处理）
+// auth.js - 纯展示层脚本（无密码校验，密码在 Functions 层处理）
 (function() {
-    const EXCLUDED_GAMES = ["game.html", "tetris", "snake"];
+    // 🛠️ 修复：Cloudflare 会去掉 .html 后缀，所以去掉后缀来匹配 game
+    const EXCLUDED_GAMES = ["game", "tetris", "snake"];
     const currentPath = window.location.pathname.toLowerCase();
-    const isGame = EXCLUDED_GAMES.some(g => currentPath.includes(g.toLowerCase()));
-    const isLoginPage = currentPath.endsWith('/login.html');
+    const isGame = EXCLUDED_GAMES.some(g => currentPath.includes(g));
+
+    // 如果是游戏页面，直接退出，不注入任何样式和导航
+    if (isGame) return;
 
     const MYSTERIOUS_THEME_CSS = `
         .page-header, #header_wrap, .site-header, .site-title, .project-name, .project-tagline, .downloads {
@@ -26,8 +29,6 @@
         body .navbar a:hover { color: #ffffff !important; }
         img { border-radius: 8px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8); border: 1px solid #2d2d2d; }
         video { border: 1px solid #2d2d2d; background-color: #000000; }
-        body input[type="text"], body input[type="password"], body textarea { background-color: #1e1e1e !important; color: #ffffff !important; border: 1px solid #3d3d3d !important; border-radius: 4px; }
-        body input:focus, body textarea:focus { border-color: #64b5f6 !important; outline: none; }
         body button, body input[type="submit"] {
             background: linear-gradient(180deg, #424242 0%, #212121 100%) !important; color: #ffffff !important; border: 1px solid #4d4d4d !important; border-radius: 25px !important;
             font-weight: bold !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6) !important; cursor: pointer !important; transition: all 0.2s ease !important;
@@ -36,44 +37,40 @@
         body footer { background: #1e1e1e !important; color: #90a4ae !important; text-align: center !important; padding: 20px !important; margin-top: 50px !important; border-top: 1px solid #2d2d2d !important; border-radius: 8px !important; box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3); }
     `;
 
-    if (!isGame && !isLoginPage) {
-        const injectStyles = () => {
-            const styleElement = document.createElement('style');
-            styleElement.appendChild(document.createTextNode(MYSTERIOUS_THEME_CSS));
-            document.head.appendChild(styleElement);
-        };
-        if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', injectStyles); } else { injectStyles(); }
-    }
+    const injectStyles = () => {
+        const styleElement = document.createElement('style');
+        styleElement.appendChild(document.createTextNode(MYSTERIOUS_THEME_CSS));
+        document.head.appendChild(styleElement);
+    };
+    if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', injectStyles); } else { injectStyles(); }
 
-    if (!isGame && !isLoginPage) {
-        document.addEventListener('DOMContentLoaded', function() {
-            const targetKillList = ['.page-header', '#header_wrap', '.site-header', '.site-title', '.project-name', '.project-tagline'];
-            targetKillList.forEach(function(selector) {
-                document.querySelectorAll(selector).forEach(function(el) { if (el) el.remove(); });
-            });
-
-            const navbarContainer = document.createElement('div');
-            navbarContainer.innerHTML = `
-                <div class="navbar">
-                    <a href="/index.html">首页</a>
-                    <a href="/contact.html">联系</a>
-                    <a href="/23.html">关于</a>
-                </div>
-                <div class="navbar">
-                    <a href="/24.html">王茂钢</a>
-                    <a href="/25.html">异闻录</a>
-                    <a href="/22.html">怪物鸡吧</a>
-                </div>
-            `;
-            document.body.insertBefore(navbarContainer, document.body.firstChild);
-
-            const footerElement = document.createElement('footer');
-            footerElement.innerHTML = `
-                <p>© 2026 川大附中天堂网 </p>
-                <p><a href="mailto:djkenfisao@proton.me" style="color: #64b5f6;">发送投稿</a></p>
-                <p><a href="/contact.html" style="color: #64b5f6;">联系我</a></p>
-            `;
-            document.body.appendChild(footerElement);
+    document.addEventListener('DOMContentLoaded', function() {
+        const targetKillList = ['.page-header', '#header_wrap', '.site-header', '.site-title', '.project-name', '.project-tagline'];
+        targetKillList.forEach(function(selector) {
+            document.querySelectorAll(selector).forEach(function(el) { if (el) el.remove(); });
         });
-    }
+
+        const navbarContainer = document.createElement('div');
+        navbarContainer.innerHTML = `
+            <div class="navbar">
+                <a href="/index.html">首页</a>
+                <a href="/contact.html">联系</a>
+                <a href="/23.html">关于</a>
+            </div>
+            <div class="navbar">
+                <a href="/24.html">王茂钢</a>
+                <a href="/25.html">异闻录</a>
+                <a href="/22.html">怪物鸡吧</a>
+            </div>
+        `;
+        document.body.insertBefore(navbarContainer, document.body.firstChild);
+
+        const footerElement = document.createElement('footer');
+        footerElement.innerHTML = `
+            <p>© 2026 川大附中天堂网 </p>
+            <p><a href="mailto:djkenfisao@proton.me" style="color: #64b5f6;">发送投稿</a></p>
+            <p><a href="/contact.html" style="color: #64b5f6;">联系我</a></p>
+        `;
+        document.body.appendChild(footerElement);
+    });
 })();
