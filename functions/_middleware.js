@@ -2,13 +2,22 @@ export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
 
-  // 🚪 处理前端发来的强制退登请求
+  // 🚪 收到前端传来的关闭网页信号，强行注销 Cookie
+  if (url.pathname === '/__logout_beacon') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Set-Cookie': 'site_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax'
+      }
+    });
+  }
+
+  // 之前的强制退登请求（保留）
   if (url.searchParams.has('logout')) {
     return new Response(null, {
       status: 302,
       headers: {
         'Location': '/',
-        // 强行让 Cookie 过期
         'Set-Cookie': 'site_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax'
       }
     });
@@ -52,6 +61,9 @@ export async function onRequest(context) {
 </html>`;
 
   return new Response(html, {
-    headers: { 'Content-Type': 'text/html; charset=utf-8' }
+    headers: { 
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store, no-cache, must-revalidate' // 防止浏览器强缓存页面
+    }
   });
 }
