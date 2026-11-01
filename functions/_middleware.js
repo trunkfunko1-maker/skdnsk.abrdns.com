@@ -2,20 +2,22 @@ export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
 
-  // 🚧 维护模式总开关：false = 正常访问，true = 全站跳转维护页
+  // 🚧 维护模式总开关：true = 开启维护；false = 正常访问
   const MAINTENANCE_MODE = true; 
 
   if (MAINTENANCE_MODE) {
-    // 放行维护页本身，防止死循环
-    if (url.pathname !== '/maintenance.html') {
+    // 核心修复：同时允许 /maintenance 和 /maintenance.html 访问
+    const isMaintenancePage = url.pathname === '/maintenance' || url.pathname === '/maintenance.html';
+    
+    if (!isMaintenancePage) {
+      // 跳转时直接带上 .html，Cloudflare 会自动处理
       return Response.redirect(new URL('/maintenance.html', url).toString(), 302);
     }
-    return next();
+    return next(); // 放行维护页本身，交给静态文件系统处理
   }
 
-  // ---- 以下为原有的正常访问与登录逻辑 ----
+  // ---- 以下为正常登录与拦截逻辑 ----
   
-  // 处理强制退登请求
   if (url.searchParams.has('logout')) {
     return new Response(null, {
       status: 302,
@@ -26,7 +28,6 @@ export async function onRequest(context) {
     });
   }
 
-  // 处理关闭网页注销 Cookie 的暗门
   if (url.pathname === '/__logout_beacon') {
     return new Response(null, {
       status: 204,
@@ -47,7 +48,6 @@ export async function onRequest(context) {
     return next();
   }
 
-  // 未登录返回登录页
   const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
