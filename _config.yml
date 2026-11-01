@@ -3,3 +3,5 @@ description: "——川大附中的人民观察家"
 show_downloads: false
 include:
   - _routes.json
+exclude:
+  - functions
