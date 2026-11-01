@@ -2,22 +2,35 @@ export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
 
-  // 🚪 收到前端传来的关闭网页信号，强行注销 Cookie
-  if (url.pathname === '/__logout_beacon') {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        'Set-Cookie': 'site_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax'
-      }
-    });
+  // 🚧 维护模式总开关：false = 正常访问，true = 全站跳转维护页
+  const MAINTENANCE_MODE = true; 
+
+  if (MAINTENANCE_MODE) {
+    // 放行维护页本身，防止死循环
+    if (url.pathname !== '/maintenance.html') {
+      return Response.redirect(new URL('/maintenance.html', url).toString(), 302);
+    }
+    return next();
   }
 
-  // 之前的强制退登请求（保留）
+  // ---- 以下为原有的正常访问与登录逻辑 ----
+  
+  // 处理强制退登请求
   if (url.searchParams.has('logout')) {
     return new Response(null, {
       status: 302,
       headers: {
         'Location': '/',
+        'Set-Cookie': 'site_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax'
+      }
+    });
+  }
+
+  // 处理关闭网页注销 Cookie 的暗门
+  if (url.pathname === '/__logout_beacon') {
+    return new Response(null, {
+      status: 204,
+      headers: {
         'Set-Cookie': 'site_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax'
       }
     });
@@ -34,6 +47,7 @@ export async function onRequest(context) {
     return next();
   }
 
+  // 未登录返回登录页
   const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -63,7 +77,7 @@ export async function onRequest(context) {
   return new Response(html, {
     headers: { 
       'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'no-store, no-cache, must-revalidate' // 防止浏览器强缓存页面
+      'Cache-Control': 'no-store, no-cache, must-revalidate'
     }
   });
 }
