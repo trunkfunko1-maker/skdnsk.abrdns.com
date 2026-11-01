@@ -1,34 +1,25 @@
 // auth.js
 (function() {
+    // 🚪 核心机制：利用 sessionStorage 判定是否为全新窗口
+    // sessionStorage 在刷新、站内跳转时不会丢失；只有关闭标签页或新开标签页才会清空。
+    if (!sessionStorage.getItem('site_auth_active')) {
+        if (window.location.search.includes('logged_in=1')) {
+            // 1. 刚登录成功跳转回来，打上已登录标记，抹掉网址后缀
+            sessionStorage.setItem('site_auth_active', '1');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } else if (!window.location.search.includes('logout=1')) {
+            // 2. 如果是新开的标签页或直接输网址，强制退登
+            window.location.replace('/?logout=1');
+            return; 
+        }
+    }
+
+    // ---- 以下为你原本的 UI 渲染逻辑 ----
     const EXCLUDED_GAMES = ["game", "tetris", "snake"];
     const currentPath = window.location.pathname.toLowerCase();
     const isGame = EXCLUDED_GAMES.some(g => currentPath.includes(g));
     if (isGame) return;
 
-    // 🚪 核心机制：识别网页关闭/切出
-    let isNavigatingInternal = false;
-
-    // 判断用户是否点了网页内部的导航链接
-    document.addEventListener('click', function(e) {
-        const a = e.target.closest('a');
-        if (a && a.href && a.href.startsWith(window.location.origin)) {
-            isNavigatingInternal = true;
-        }
-    });
-
-    // 网页隐藏/关闭时触发
-    window.addEventListener('pagehide', function() {
-        // 如果只是点链接跳转，不清除
-        if (isNavigatingInternal) return;
-        // 如果当前在登录跳转的瞬间，不清除
-        if (window.location.search.includes('logged_in=1')) return;
-
-        // 否则（用户关闭标签页、关浏览器、地址栏输入新网址），发送信号给后端清 Cookie
-        navigator.sendBeacon('/__logout_beacon');
-    });
-
-
-    // ---- 以下为你原本的 UI 渲染逻辑，完全保留 ----
     const MYSTERIOUS_THEME_CSS = `
         .page-header, #header_wrap, .site-header, .site-title, .project-name, .project-tagline, .downloads {
             display: none !important; height: 0 !important; min-height: 0 !important; max-height: 0 !important;
