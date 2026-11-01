@@ -2,7 +2,7 @@
 (function() {
     const MAINTENANCE_MODE = true; // ← 改这里
 
-    // 🚧 维护模式拦截
+    // 🚧维护模式拦截
     if (MAINTENANCE_MODE) {
         // 防止维护页自身也被重定向，造成死循环
         if (!window.location.pathname.endsWith('/maintenance.html')) {
