@@ -10,7 +10,8 @@ export async function onRequestPost(context) {
       status: 302,
       headers: {
         'Location': '/',
-        'Set-Cookie': `site_auth=${expectedToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`
+        // 🔑 核心修改：去掉了 Max-Age=86400，将其变为会话 Cookie
+        'Set-Cookie': `site_auth=${expectedToken}; Path=/; HttpOnly; SameSite=Lax`
       }
     });
   }
