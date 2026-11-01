@@ -2,7 +2,18 @@ export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
 
-  // 放行登录接口
+  // 🚪 处理前端发来的强制退登请求
+  if (url.searchParams.has('logout')) {
+    return new Response(null, {
+      status: 302,
+      headers: {
+        'Location': '/',
+        // 强行让 Cookie 过期
+        'Set-Cookie': 'site_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax'
+      }
+    });
+  }
+
   if (url.pathname === '/__login') {
     return next();
   }
@@ -10,12 +21,10 @@ export async function onRequest(context) {
   const cookieHeader = request.headers.get('Cookie') || '';
   const expectedToken = env.SITE_PASSWORD || "fallback_secret_323339";
   
-  // 检查 Cookie 是否存在
   if (cookieHeader.includes(`site_auth=${expectedToken}`)) {
     return next();
   }
 
-  // 如果没有 Cookie，直接返回极其简单的登录页，防止任何语法错误导致 Fail Open
   const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
