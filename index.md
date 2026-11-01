@@ -28,5 +28,5 @@
 </div>
 
 <div style="text-align: center; margin: 30px 0;">
-    <img src="https://i.ibb.co/C5qBb6jb/IMG-20261023-215721.jpg" alt="IMG 20261023 215721" border="0" width="50%">
+    <img src="https://res.cloudinary.com/dnbixfto5/image/upload/v1793539495/IMG_20261024_211037_c70yfr.jpg" alt="IMG 20261024 211037 c70yfr" border="0" width="50%">
 </div>
