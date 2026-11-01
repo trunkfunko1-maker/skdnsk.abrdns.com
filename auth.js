@@ -1,16 +1,5 @@
 // auth.js - 全站一体化脚本：黑灰主题 + 修正导航栏文字
-(function() {
-    const MAINTENANCE_MODE = false; // ← 改这里
-
-    // 🚧维护模式拦截
-    if (MAINTENANCE_MODE) {
-        // 防止维护页自身也被重定向，造成死循环
-        if (!window.location.pathname.endsWith('/maintenance.html')) {
-            window.location.replace('/maintenance.html');
-            return; // 终止后续所有代码执行
-        }
-    }
-
+(function() 
     // ... 下面是你原有的主题、导航栏、页脚等全部逻辑（保持不变）
     // 🔒 1. 基础配置
     const CORRECT_PASSWORD = "323339";
