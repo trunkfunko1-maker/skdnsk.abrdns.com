@@ -1,3 +1,13 @@
+// 严格防偷窥：如果是新开的标签页，强制清除登录状态
+if (!sessionStorage.getItem('tab_active')) {
+    sessionStorage.setItem('tab_active', '1');
+    // 清除 Cloudflare 的 Cookie
+    document.cookie = "site_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    // 如果当前不是登录页（实际上 Cloudflare 已经放行网页了），直接刷新让 Cloudflare 重新拦截
+    if (!window.location.pathname.includes('__login')) {
+        window.location.reload();
+    }
+}
 // auth.js - 纯展示层脚本（无密码校验，密码在 Functions 层处理）
 (function() {
     // 🛠️ 修复：Cloudflare 会去掉 .html 后缀，所以去掉后缀来匹配 game
