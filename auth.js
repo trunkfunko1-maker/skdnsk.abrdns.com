@@ -1,27 +1,34 @@
+// auth.js
 (function() {
-    // 🚪 核心：判断是否是新开的网页（新标签页）
-    // sessionStorage 仅在当前标签页生效，关掉网页/标签页就会清空
-    if (!sessionStorage.getItem('site_auth_active')) {
-        if (window.location.search.includes('logged_in=1')) {
-            // 如果是刚登录成功跳转过来的，打上已登录标记，并把网址还原
-            sessionStorage.setItem('site_auth_active', '1');
-            window.history.replaceState({}, document.title, window.location.pathname);
-        } else if (!window.location.search.includes('logout=1')) {
-            // 如果是新开的网页，且不是正在退登，强制去请求后端清除 Cookie 并踢出
-            window.location.replace('/?logout=1');
-            return; 
-        }
-    }
-// auth.js - 纯展示层脚本（无密码校验，密码在 Functions 层处理）
-(function() {
-    // 🛠️ 修复：Cloudflare 会去掉 .html 后缀，所以去掉后缀来匹配 game
     const EXCLUDED_GAMES = ["game", "tetris", "snake"];
     const currentPath = window.location.pathname.toLowerCase();
     const isGame = EXCLUDED_GAMES.some(g => currentPath.includes(g));
-
-    // 如果是游戏页面，直接退出，不注入任何样式和导航
     if (isGame) return;
 
+    // 🚪 核心机制：识别网页关闭/切出
+    let isNavigatingInternal = false;
+
+    // 判断用户是否点了网页内部的导航链接
+    document.addEventListener('click', function(e) {
+        const a = e.target.closest('a');
+        if (a && a.href && a.href.startsWith(window.location.origin)) {
+            isNavigatingInternal = true;
+        }
+    });
+
+    // 网页隐藏/关闭时触发
+    window.addEventListener('pagehide', function() {
+        // 如果只是点链接跳转，不清除
+        if (isNavigatingInternal) return;
+        // 如果当前在登录跳转的瞬间，不清除
+        if (window.location.search.includes('logged_in=1')) return;
+
+        // 否则（用户关闭标签页、关浏览器、地址栏输入新网址），发送信号给后端清 Cookie
+        navigator.sendBeacon('/__logout_beacon');
+    });
+
+
+    // ---- 以下为你原本的 UI 渲染逻辑，完全保留 ----
     const MYSTERIOUS_THEME_CSS = `
         .page-header, #header_wrap, .site-header, .site-title, .project-name, .project-tagline, .downloads {
             display: none !important; height: 0 !important; min-height: 0 !important; max-height: 0 !important;
