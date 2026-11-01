@@ -26,3 +26,7 @@
 <div style="text-align: center; margin: 30px 0;">
     <img src="https://i.ibb.co/YFfvByLR/retouch-2026050500192841-edit-166799889432881.jpg" alt="retouch 2026050500192841 edit 166799889432881" border="0" width="50%">
 </div>
+
+<div style="text-align: center; margin: 30px 0;">
+    <img src="https://i.ibb.co/C5qBb6jb/IMG-20261023-215721.jpg" alt="IMG 20261023 215721" border="0" width="50%">
+</div>
