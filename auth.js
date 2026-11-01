@@ -1,25 +1,24 @@
 // auth.js
 (function() {
-    // 🚪 核心机制：利用 sessionStorage 判定是否为全新窗口
-    // sessionStorage 在刷新、站内跳转时不会丢失；只有关闭标签页或新开标签页才会清空。
+    // 1. 优先判断是否为游戏页，如果是，直接放行，不执行任何验证和拦截
+    const EXCLUDED_GAMES = ["game", "tetris", "snake"];
+    const currentPath = window.location.pathname.toLowerCase();
+    const isGame = EXCLUDED_GAMES.some(g => currentPath.includes(g));
+    
+    if (isGame) return;
+
+    // 2. 核心机制：利用 sessionStorage 判定是否为全新窗口
     if (!sessionStorage.getItem('site_auth_active')) {
         if (window.location.search.includes('logged_in=1')) {
-            // 1. 刚登录成功跳转回来，打上已登录标记，抹掉网址后缀
             sessionStorage.setItem('site_auth_active', '1');
             window.history.replaceState({}, document.title, window.location.pathname);
         } else if (!window.location.search.includes('logout=1')) {
-            // 2. 如果是新开的标签页或直接输网址，强制退登
             window.location.replace('/?logout=1');
             return; 
         }
     }
 
     // ---- 以下为你原本的 UI 渲染逻辑 ----
-    const EXCLUDED_GAMES = ["game", "tetris", "snake"];
-    const currentPath = window.location.pathname.toLowerCase();
-    const isGame = EXCLUDED_GAMES.some(g => currentPath.includes(g));
-    if (isGame) return;
-
     const MYSTERIOUS_THEME_CSS = `
         .page-header, #header_wrap, .site-header, .site-title, .project-name, .project-tagline, .downloads {
             display: none !important; height: 0 !important; min-height: 0 !important; max-height: 0 !important;
