@@ -1,6 +1,6 @@
 // auth.js - 全站一体化脚本：黑灰主题 + 修正导航栏文字
 (function() {
-    const MAINTENANCE_MODE = false; // ← 改这里
+    const MAINTENANCE_MODE = true; // ← 改这里
 
     // 🚧 维护模式拦截
     if (MAINTENANCE_MODE) {
