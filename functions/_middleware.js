@@ -3,7 +3,7 @@ export async function onRequest(context) {
   const url = new URL(request.url);
 
   // 🚧 维护模式总开关：true = 开启维护；false = 正常访问
-  const MAINTENANCE_MODE = false; 
+  const MAINTENANCE_MODE = true; 
 
   if (MAINTENANCE_MODE) {
     // 核心修复：同时允许 /maintenance 和 /maintenance.html 访问
