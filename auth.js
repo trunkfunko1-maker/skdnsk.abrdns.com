@@ -12,16 +12,6 @@
             return; 
         }
     }
-
-    // ---- 下面是你原本的 UI 渲染逻辑，保持不变 ----
-    const EXCLUDED_GAMES = ["game", "tetris", "snake"];
-    const currentPath = window.location.pathname.toLowerCase();
-    const isGame = EXCLUDED_GAMES.some(g => currentPath.includes(g));
-    if (isGame) return;
-
-    const MYSTERIOUS_THEME_CSS = `...你原本的 CSS 代码...`;
-
-    // ... (后面全部保持原样)
 // auth.js - 纯展示层脚本（无密码校验，密码在 Functions 层处理）
 (function() {
     // 🛠️ 修复：Cloudflare 会去掉 .html 后缀，所以去掉后缀来匹配 game
