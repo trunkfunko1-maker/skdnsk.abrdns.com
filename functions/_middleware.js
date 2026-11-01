@@ -1,27 +1,33 @@
 // functions/_middleware.js
-// 全站守卫：所有请求先经过这里，验证 Cookie 后才放行到静态资源
+// 全站守卫：维护模式 → 登录验证 → 放行静态资源
 
 export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
 
-  // 放行登录接口本身，否则永远无法提交密码
-  if (url.pathname === '/__login') {
+  // 🚧 维护模式总开关：true = 全站跳维护页；false = 正常登录流程
+  const MAINTENANCE_MODE = false;
+
+  if (MAINTENANCE_MODE && url.pathname !== '/maintenance.html') {
+    return Response.redirect(new URL('/maintenance.html', url), 302);
+  }
+
+  // 放行登录接口与维护页本身
+  if (url.pathname === '/__login' || url.pathname === '/maintenance.html') {
     return next();
   }
 
   const cookieHeader = request.headers.get('Cookie') || '';
-  const expectedToken = env.SITE_PASSWORD; // 直接用密码本身作为令牌的简单方案
+  const expectedToken = env.SITE_PASSWORD;
   const hasValidCookie = cookieHeader
     .split(';')
     .map(c => c.trim())
     .some(c => c === `site_auth=${expectedToken}`);
 
   if (hasValidCookie) {
-    return next(); // ✅ 已验证，放行到你的静态页面
+    return next();
   }
 
-  // ❌ 未验证：返回自定义登录页
   return new Response(renderLoginPage(url.pathname), {
     status: 200,
     headers: { 'Content-Type': 'text/html; charset=utf-8' }
