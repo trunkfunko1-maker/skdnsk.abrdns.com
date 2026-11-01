@@ -9,8 +9,9 @@ export async function onRequestPost(context) {
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': '/',
-        // 🔑 核心修改：去掉了 Max-Age=86400，将其变为会话 Cookie
+        // 注意这里加了 ?logged_in=1
+        'Location': '/?logged_in=1',
+        // 依然是会话 Cookie（没有 Max-Age），关浏览器即死
         'Set-Cookie': `site_auth=${expectedToken}; Path=/; HttpOnly; SameSite=Lax`
       }
     });
