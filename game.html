@@ -13,7 +13,6 @@
             user-select: none !important;
             -webkit-user-select: none !important;
             -webkit-touch-callout: none !important;
-            /* 🛠️ 修复：去除全局的 touch-action: none，避免按钮点击被拦截 */
         }
         body {
             background: linear-gradient(135deg, #0f0c20 0%, #15102a 100%);
@@ -25,7 +24,7 @@
             min-height: 100vh;
             min-height: 100dvh; 
             overflow: hidden;
-            touch-action: manipulation; /* 允许正常点击 */
+            touch-action: manipulation;
         }
 
         #wrapper {
@@ -200,7 +199,7 @@
             display: flex;
             gap: 15px;
             margin-bottom: 25px;
-            z-index: 20; /* 确保按钮在最上层 */
+            z-index: 20;
         }
         .mode-btn {
             padding: 8px 18px;
@@ -212,7 +211,7 @@
             cursor: pointer;
             font-weight: bold;
             transition: all 0.2s ease;
-            touch-action: manipulation; /* 允许点击 */
+            touch-action: manipulation;
         }
         .mode-btn.active {
             background: #ff4757;
@@ -231,8 +230,18 @@
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(46, 213, 115, 0.4);
-            z-index: 20; /* 确保按钮在最上层 */
-            touch-action: manipulation; /* 允许点击 */
+            z-index: 20;
+            touch-action: manipulation;
+            transition: all 0.3s;
+        }
+        
+        /* 禁用状态的按钮样式 */
+        .main-btn:disabled {
+            background: #555 !important;
+            color: #999 !important;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
         }
 
         #mobile-controller {
@@ -268,7 +277,7 @@
             -webkit-backdrop-filter: blur(4px);
             width: 62px;  
             height: 62px; 
-            touch-action: none; /* 仅在这里禁止系统手势，交给触摸事件处理 */
+            touch-action: none;
             -webkit-touch-callout: none !important;
         }
         .ctrl-btn:active {
@@ -330,7 +339,8 @@
                         <button class="mode-btn" id="mode-pc">🖥️ 电脑端网页</button>
                     </div>
 
-                    <button id="start-btn" class="main-btn">开始游戏</button>
+                    <!-- 初始状态设置为禁用，等待图片加载 -->
+                    <button id="start-btn" class="main-btn" disabled>资源加载中...</button>
                 </div>
 
                 <div class="overlay-footer">© 2026 川大附中天堂网出品</div>
@@ -349,12 +359,12 @@
     </div>
 
 <script>
-    // 🛠️ 核心修复：用 DOMContentLoaded 包裹，确保所有元素加载完毕后再执行 JS
     window.addEventListener('DOMContentLoaded', function() {
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
         const wrapper = document.getElementById('wrapper');
+        const startBtn = document.getElementById('start-btn');
 
         let currentDeviceMode = 'mobile'; 
 
@@ -365,7 +375,6 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // 挂载到 window 对象上（虽然现在用 addEventListener 替代了 onclick，但保留以求稳妥）
         window.switchMode = function(mode) {
             if(isPlaying) return;
             currentDeviceMode = mode;
@@ -393,20 +402,50 @@
             setTimeout(resizeCanvas, 50); 
         };
 
-        // 绑定按钮点击事件
         document.getElementById('mode-mobile').addEventListener('click', () => window.switchMode('mobile'));
         document.getElementById('mode-pc').addEventListener('click', () => window.switchMode('pc'));
-        document.getElementById('start-btn').addEventListener('click', () => window.startGame());
 
         const ENEMY_ALIVE_SRC = 'https://res.cloudinary.com/dnbixfto5/image/upload/v1793541412/Screenshot-20260517-004026-edit-580395464196329_hvnjzz.png'; 
         const ENEMY_HIT_SRC = 'https://res.cloudinary.com/dnbixfto5/image/upload/v1793541413/retouch-2026051701391671_zaqym5.png';   
         const ENEMY_SPECIAL_SRC = 'https://res.cloudinary.com/dnbixfto5/image/upload/v1793541412/Screenshot-20260517-151827_leriio.png'; 
         const ENEMY_SPECIAL_HIT_SRC = 'https://res.cloudinary.com/dnbixfto5/image/upload/v1793541413/Screenshot-20260517-152843_qqtndf.png'; 
 
-        const imgAlive = new Image(); imgAlive.src = ENEMY_ALIVE_SRC;
-        const imgHit = new Image(); imgHit.src = ENEMY_HIT_SRC;
-        const imgSpecial = new Image(); imgSpecial.src = ENEMY_SPECIAL_SRC;
-        const imgSpecialHit = new Image(); imgSpecialHit.src = ENEMY_SPECIAL_HIT_SRC;
+        // 🎯 核心修复：图片预加载机制
+        const imgAlive = new Image(); 
+        const imgHit = new Image(); 
+        const imgSpecial = new Image(); 
+        const imgSpecialHit = new Image(); 
+        
+        let loadedCount = 0;
+        const totalImages = 4;
+
+        function checkAssetsLoaded() {
+            loadedCount++;
+            if (loadedCount === totalImages) {
+                startBtn.innerText = "开始游戏";
+                startBtn.disabled = false; // 解锁按钮
+            }
+        }
+
+        imgAlive.onload = checkAssetsLoaded;
+        imgHit.onload = checkAssetsLoaded;
+        imgSpecial.onload = checkAssetsLoaded;
+        imgSpecialHit.onload = checkAssetsLoaded;
+
+        // 容错处理：如果某张图挂了，也允许开始，防止一直卡在加载中
+        const onError = () => {
+            console.warn("部分图片加载失败，已忽略。");
+            checkAssetsLoaded();
+        };
+        imgAlive.onerror = onError;
+        imgHit.onerror = onError;
+        imgSpecial.onerror = onError;
+        imgSpecialHit.onerror = onError;
+
+        imgAlive.src = ENEMY_ALIVE_SRC;
+        imgHit.src = ENEMY_HIT_SRC;
+        imgSpecial.src = ENEMY_SPECIAL_SRC;
+        imgSpecialHit.src = ENEMY_SPECIAL_HIT_SRC;
 
         let score = 0;
         let timeLeft = 30;
@@ -504,7 +543,8 @@
             for (let i = 0; i < 95; i++) {
                 let angle = Math.random() * Math.PI * 2;
                 let speed = 5 + Math.random() * 14;
-                bombExplosionParticles.push({
+                bombExplosionParticles.
+                    push({
                     x: px, y: py, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
                     gravity: 0.05 + Math.random() * 0.06, size: 2.5 + Math.random() * 4.5, alpha: 1, decay: 0.014 + Math.random() * 0.012, styleGroup: Math.random() > 0.4 ? 'spark' : 'plasma' 
                 });
@@ -671,6 +711,9 @@
         }
 
         window.startGame = function() {
+            // 如果还未加载完，不执行
+            if (startBtn.disabled) return;
+
             document.getElementById('overlay').style.display = 'none';
             document.getElementById('special-popup').style.display = 'none';
             if (currentDeviceMode === 'mobile') { document.getElementById('mobile-controller').style.display = 'flex'; } 
@@ -708,6 +751,8 @@
             }, 1000);
         };
 
+        startBtn.addEventListener('click', window.startGame);
+
         function endGame(reason) {
             isPlaying = false;
             clearInterval(countdownInterval);
@@ -734,12 +779,11 @@
                 descElement.innerHTML = `恭喜你在猛烈攻势下撑过了 30 秒！🏆<br><br>最终统计算分：<span style="color:#fff200; font-weight:bold;">${score}</span> 分`;
             }
             
-            document.getElementById('start-btn').innerText = "再次挑战";
+            startBtn.innerText = "再次挑战";
             document.getElementById('overlay').style.display = 'flex';
             setTimeout(resizeCanvas, 50); 
         }
 
-        // 初始化页面状态
         window.switchMode('mobile');
     });
 </script>
