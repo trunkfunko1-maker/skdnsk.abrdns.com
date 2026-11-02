@@ -1,40 +1,31 @@
 // auth.js
 (function() {
-    // 🖼️ 在这里替换你想要的暗色背景图直链
     const BG_IMAGE_URL = 'https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=1920&auto=format&fit=crop'; 
     
-    // 1. 优先判断是否为游戏页，如果是，直接放行
     const EXCLUDED_GAMES = ["game", "tetris", "snake"];
     const currentPath = window.location.pathname.toLowerCase();
     const isGame = EXCLUDED_GAMES.some(g => currentPath.includes(g));
     if (isGame) return;
 
-    // 2. 优化后的防误杀验证机制
+    // 拦截机制
     if (!sessionStorage.getItem('site_auth_active')) {
         if (window.location.search.includes('logged_in=1')) {
-            // 情况 A：刚输入密码登录成功，打上标记并清理网址
             sessionStorage.setItem('site_auth_active', '1');
             window.history.replaceState({}, document.title, window.location.pathname);
         } else if (window.location.search.includes('logout=1')) {
-            // 情况 B：已经处于注销跳转中，不再重复触发
             return;
         } else {
-            // 情况 C：判定是否为“站内点击链接跳转”
-            // 如果 Referrer 包含你的域名，说明是从站内其他页面点过来的，不能踢！
             const isInternalNav = document.referrer && document.referrer.includes(window.location.host);
-            
             if (isInternalNav) {
-                // 是站内跳转，说明浏览器吞了 sessionStorage，我们自动补齐，直接放行
                 sessionStorage.setItem('site_auth_active', '1');
             } else {
-                // 只有真正的新开标签页、外部链接进入、或直接输入网址，才去请求退登
                 window.location.replace('/?logout=1');
                 return;
             }
         }
     }
 
-    // 3. 全新高舒适度暗黑毛玻璃主题 CSS（保持不变）
+    // 全新高舒适度暗黑毛玻璃主题 CSS（修复顶部空白）
     const MYSTERIOUS_THEME_CSS = `
         html {
             background: url('${BG_IMAGE_URL}') no-repeat center center fixed !important;
@@ -49,9 +40,13 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
         }
+        
+        /* 🎯 修复空白：彻底干掉 GitHub 默认头部的所有边距 */
         .page-header, #header_wrap, .site-header, .site-title, .project-name, .project-tagline, .downloads {
             display: none !important; height: 0 !important; margin: 0 !important; padding: 0 !important;
         }
+
+        /* 🎯 修复空白：强制清除 Jekyll 容器和首行标题的顶部边距 */
         .wrapper, .container, .main-content, #content, main, section, article, .markdown-body, .contact-container {
             background: rgba(20, 22, 28, 0.85) !important; 
             backdrop-filter: blur(12px) !important; 
@@ -63,12 +58,19 @@
             max-width: 900px !important;
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6) !important;
         }
+        .markdown-body > *:first-child, 
+        article > *:first-child, 
+        main > *:first-child, 
+        h1:first-of-type { 
+            margin-top: 0 !important; 
+        }
+
         p, span, li, td, th, em, strong, label { color: #cbd5e1 !important; line-height: 1.8; }
         h1, h2, h3, h4, h5, h6 { 
             color: #ffffff !important; 
             border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important; 
             padding-bottom: 10px;
-            margin-top: 1.2em;
+            margin-top: 1em;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         body a { color: #60a5fa !important; text-decoration: none; transition: all 0.2s; }
@@ -94,6 +96,8 @@
             transition: transform 0.3s ease;
         }
         img:hover { transform: scale(1.02); }
+        
+        /* 导航栏置顶调整 */
         body .navbar {
             background: rgba(30, 34, 42, 0.9) !important; 
             border: 1px solid rgba(255, 255, 255, 0.1) !important; 
@@ -107,6 +111,7 @@
         }
         body .navbar a { color: #94a3b8 !important; margin: 0 5px !important; font-size: 14px !important; }
         body .navbar a:hover { color: #ffffff !important; }
+        
         input[type="text"], input[type="password"], textarea {
             background: rgba(0, 0, 0, 0.5) !important;
             border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -116,6 +121,7 @@
             transition: border-color 0.2s;
         }
         input:focus, textarea:focus { border-color: #60a5fa !important; outline: none; }
+        
         body footer { 
             text-align: center !important; 
             padding: 20px 0 !important; 
@@ -126,6 +132,7 @@
         }
         body footer a { color: #64748b !important; margin: 0 5px; }
         body footer a:hover { color: #94a3b8 !important; }
+        
         @media (max-width: 600px) {
             body { padding: 10px !important; }
             .wrapper, .container, .main-content, #content, main, section, article, .markdown-body {
@@ -147,7 +154,7 @@
     };
     if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', injectStyles); } else { injectStyles(); }
 
-    // 4. 注入导航栏与页脚
+    // 注入导航栏与页脚
     document.addEventListener('DOMContentLoaded', function() {
         const targetKillList = ['.page-header', '#header_wrap', '.site-header', '.site-title', '.project-name', '.project-tagline'];
         targetKillList.forEach(function(selector) {
