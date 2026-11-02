@@ -1,5 +1,6 @@
 // auth.js
 (function() {
+    // 🖼️ 背景图直链
     const BG_IMAGE_URL = 'https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=1920&auto=format&fit=crop'; 
     
     const EXCLUDED_GAMES = ["game", "tetris", "snake"];
@@ -25,11 +26,11 @@
         }
     }
 
-    // 全新高舒适度暗黑毛玻璃主题 CSS（修复顶部空白）
+    // 全新高舒适度暗黑毛玻璃主题 CSS（修复滑动白屏与背景抖动）
     const MYSTERIOUS_THEME_CSS = `
+        /* 修复滑动闪白：给 html 和 body 铺满暗色底 */
         html {
-            background: url('${BG_IMAGE_URL}') no-repeat center center fixed !important;
-            background-size: cover !important;
+            background-color: #0f0c20 !important;
             min-height: 100vh;
         }
         body {
@@ -39,14 +40,31 @@
             padding: 15px !important; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
+            position: relative;
         }
         
-        /* 🎯 修复空白：彻底干掉 GitHub 默认头部的所有边距 */
+        /* 🎯 核心修复：使用固定伪元素做背景，避免移动端 background-attachment 的渲染 Bug */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('${BG_IMAGE_URL}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+            /* 触发 GPU 硬件加速，减少重绘抖动 */
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
         .page-header, #header_wrap, .site-header, .site-title, .project-name, .project-tagline, .downloads {
             display: none !important; height: 0 !important; margin: 0 !important; padding: 0 !important;
         }
 
-        /* 🎯 修复空白：强制清除 Jekyll 容器和首行标题的顶部边距 */
         .wrapper, .container, .main-content, #content, main, section, article, .markdown-body, .contact-container {
             background: rgba(20, 22, 28, 0.85) !important; 
             backdrop-filter: blur(12px) !important; 
@@ -87,6 +105,7 @@
             transition: all 0.2s ease !important;
         }
         body button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5) !important; }
+        
         img, video, iframe {
             max-width: 100% !important;
             border-radius: 12px !important;
@@ -97,7 +116,6 @@
         }
         img:hover { transform: scale(1.02); }
         
-        /* 导航栏置顶调整 */
         body .navbar {
             background: rgba(30, 34, 42, 0.9) !important; 
             border: 1px solid rgba(255, 255, 255, 0.1) !important; 
@@ -108,6 +126,7 @@
             justify-content: space-around !important;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
         body .navbar a { color: #94a3b8 !important; margin: 0 5px !important; font-size: 14px !important; }
         body .navbar a:hover { color: #ffffff !important; }
