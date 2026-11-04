@@ -308,8 +308,6 @@
                     <h2 id="overlay-title">王茂钢打飞机<br>大作战</h2>
                     <p id="overlay-desc">正在检测设备...</p>
                     
-                    <!-- 移除了原本的选择按钮区域 -->
-
                     <button id="start-btn" class="main-btn" disabled>资源加载中...</button>
                 </div>
 
@@ -336,9 +334,24 @@
         const wrapper = document.getElementById('wrapper');
         const startBtn = document.getElementById('start-btn');
 
+        // 🎯 1. 提前声明所有游戏变量，防止 TDZ 报错
         let currentDeviceMode = 'mobile'; 
+        let score = 0;
+        let timeLeft = 30;
+        let isPlaying = false;
+        let countdownInterval = null;
+        let popupTimer = null;
+        let player = { x: 0, y: 0, size: 40, speed: 6 }; 
+        let bullets = [];
+        let enemies = [];
+        let keys = { up: false, down: false, left: false, right: false };
+        let specialSpawnSeconds = [];
+        let bombSpawnSeconds = []; 
+        let bombExplosionParticles = [];
+        let isBombExploding = false;
+        let bombExplosionTimer = 0;
 
-        // 🎯 核心修改：通过 UA 自动识别手机还是电脑
+        // 🎯 2. 核心修改：通过 UA 自动识别手机还是电脑
         const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
         if (isMobile) {
             currentDeviceMode = 'mobile';
@@ -400,24 +413,6 @@
         imgHit.src = ENEMY_HIT_SRC;
         imgSpecial.src = ENEMY_SPECIAL_SRC;
         imgSpecialHit.src = ENEMY_SPECIAL_HIT_SRC;
-
-        let score = 0;
-        let timeLeft = 30;
-        let isPlaying = false;
-        let countdownInterval = null;
-        let popupTimer = null;
-
-        let player = { x: 0, y: 0, size: 40, speed: 6 }; 
-        let bullets = [];
-        let enemies = [];
-        let keys = { up: false, down: false, left: false, right: false };
-        
-        let specialSpawnSeconds = [];
-        let bombSpawnSeconds = []; 
-
-        let bombExplosionParticles = [];
-        let isBombExploding = false;
-        let bombExplosionTimer = 0;
 
         function drawFighter(x, y, size) {
             ctx.save();
@@ -502,8 +497,9 @@
                     gravity: 0.05 + Math.random() * 0.06, size: 2.5 + Math.random() * 4.5, alpha: 1, decay: 0.014 + Math.random() * 0.012, styleGroup: Math.random() > 0.4 ? 'spark' : 'plasma' 
                 });
             }
-            
-            window.addEventListener('keydown', e => {
+        }
+
+        window.addEventListener('keydown', e => {
             if(!isPlaying || isBombExploding) return;
             if(e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.up = true;
             if(e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = true;
