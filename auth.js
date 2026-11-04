@@ -26,7 +26,7 @@
         }
     }
 
-    // 全新高舒适度暗黑毛玻璃主题 CSS（修复滑动白屏与背景抖动）
+    // 全新高舒适度暗黑毛玻璃主题 CSS
     const MYSTERIOUS_THEME_CSS = `
         /* 修复滑动闪白：给 html 和 body 铺满暗色底 */
         html {
@@ -56,7 +56,6 @@
             background-position: center;
             background-repeat: no-repeat;
             z-index: -1;
-            /* 触发 GPU 硬件加速，减少重绘抖动 */
             will-change: transform;
             transform: translateZ(0);
         }
@@ -131,6 +130,7 @@
         body .navbar a { color: #94a3b8 !important; margin: 0 5px !important; font-size: 14px !important; }
         body .navbar a:hover { color: #ffffff !important; }
         
+        /* 🎯 修复输入框溢出：加入 box-sizing: border-box */
         input[type="text"], input[type="password"], textarea {
             background: rgba(0, 0, 0, 0.5) !important;
             border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -138,6 +138,8 @@
             border-radius: 8px !important;
             padding: 12px !important;
             transition: border-color 0.2s;
+            box-sizing: border-box !important; 
+            width: 100% !important;
         }
         input:focus, textarea:focus { border-color: #60a5fa !important; outline: none; }
         
