@@ -193,32 +193,7 @@
             to { transform: scale(1.05); }
         }
 
-        .overlay p { margin-bottom: 20px; font-size: 14px; color: #ccc; line-height: 1.6; }
-
-        .mode-selector {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            z-index: 20;
-        }
-        .mode-btn {
-            padding: 8px 18px;
-            font-size: 14px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #aaa;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s ease;
-            touch-action: manipulation;
-        }
-        .mode-btn.active {
-            background: #ff4757;
-            color: #fff;
-            border-color: #ff4757;
-            box-shadow: 0 0 12px rgba(255, 71, 87, 0.5);
-        }
+        .overlay p { margin-bottom: 25px; font-size: 14px; color: #ccc; line-height: 1.6; }
 
         .main-btn {
             padding: 12px 45px;
@@ -235,7 +210,6 @@
             transition: all 0.3s;
         }
         
-        /* 禁用状态的按钮样式 */
         .main-btn:disabled {
             background: #555 !important;
             color: #999 !important;
@@ -332,14 +306,10 @@
             <div id="overlay" class="overlay">
                 <div class="overlay-content">
                     <h2 id="overlay-title">王茂钢打飞机<br>大作战</h2>
-                    <p id="overlay-desc">请先选择对应的网页游玩终端：</p>
+                    <p id="overlay-desc">正在检测设备...</p>
                     
-                    <div class="mode-selector" id="selector-box">
-                        <button class="mode-btn active" id="mode-mobile">📱 手机端网页</button>
-                        <button class="mode-btn" id="mode-pc">🖥️ 电脑端网页</button>
-                    </div>
+                    <!-- 移除了原本的选择按钮区域 -->
 
-                    <!-- 初始状态设置为禁用，等待图片加载 -->
                     <button id="start-btn" class="main-btn" disabled>资源加载中...</button>
                 </div>
 
@@ -368,6 +338,22 @@
 
         let currentDeviceMode = 'mobile'; 
 
+        // 🎯 核心修改：通过 UA 自动识别手机还是电脑
+        const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        if (isMobile) {
+            currentDeviceMode = 'mobile';
+            wrapper.classList.remove('pc-mode');
+            document.getElementById('overlay-desc').innerHTML = "使用下方的独立操纵盘左右键移动<br>红颜色按钮全力开火！";
+            player.size = 40;
+            player.speed = 6;
+        } else {
+            currentDeviceMode = 'pc';
+            wrapper.classList.add('pc-mode');
+            document.getElementById('overlay-desc').innerHTML = "【电脑端控制指南】<br>移动：键盘 A、D 键 或 ◀ ▶ 方向键<br>开火：空格键 或 J 键";
+            player.size = 44; 
+            player.speed = 7;
+        }
+
         function resizeCanvas() {
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
@@ -375,42 +361,11 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        window.switchMode = function(mode) {
-            if(isPlaying) return;
-            currentDeviceMode = mode;
-            
-            const btnMobile = document.getElementById('mode-mobile');
-            const btnPC = document.getElementById('mode-pc');
-            const descText = document.getElementById('overlay-desc');
-
-            if(mode === 'pc') {
-                wrapper.classList.add('pc-mode');
-                btnPC.classList.add('active');
-                btnMobile.classList.remove('active');
-                descText.innerHTML = "【电脑端控制指南】<br>移动：键盘 A、D 键 或 ◀ ▶ 方向键<br>开火：空格键 或 J 键";
-                player.size = 44; 
-                player.speed = 7;
-            } else {
-                wrapper.classList.remove('pc-mode');
-                btnMobile.classList.add('active');
-                btnPC.classList.remove('active');
-                descText.innerHTML = "使用下方的独立操纵盘左右键移动<br>红颜色按钮全力开火！";
-                player.size = 40;
-                player.speed = 6;
-            }
-            keys.left = false; keys.right = false; keys.up = false; keys.down = false;
-            setTimeout(resizeCanvas, 50); 
-        };
-
-        document.getElementById('mode-mobile').addEventListener('click', () => window.switchMode('mobile'));
-        document.getElementById('mode-pc').addEventListener('click', () => window.switchMode('pc'));
-
         const ENEMY_ALIVE_SRC = 'https://res.cloudinary.com/dnbixfto5/image/upload/v1793541412/Screenshot-20260517-004026-edit-580395464196329_hvnjzz.png'; 
         const ENEMY_HIT_SRC = 'https://res.cloudinary.com/dnbixfto5/image/upload/v1793541413/retouch-2026051701391671_zaqym5.png';   
         const ENEMY_SPECIAL_SRC = 'https://res.cloudinary.com/dnbixfto5/image/upload/v1793541412/Screenshot-20260517-151827_leriio.png'; 
         const ENEMY_SPECIAL_HIT_SRC = 'https://res.cloudinary.com/dnbixfto5/image/upload/v1793541413/Screenshot-20260517-152843_qqtndf.png'; 
 
-        // 🎯 核心修复：图片预加载机制
         const imgAlive = new Image(); 
         const imgHit = new Image(); 
         const imgSpecial = new Image(); 
@@ -423,7 +378,7 @@
             loadedCount++;
             if (loadedCount === totalImages) {
                 startBtn.innerText = "开始游戏";
-                startBtn.disabled = false; // 解锁按钮
+                startBtn.disabled = false; 
             }
         }
 
@@ -432,7 +387,6 @@
         imgSpecial.onload = checkAssetsLoaded;
         imgSpecialHit.onload = checkAssetsLoaded;
 
-        // 容错处理：如果某张图挂了，也允许开始，防止一直卡在加载中
         const onError = () => {
             console.warn("部分图片加载失败，已忽略。");
             checkAssetsLoaded();
@@ -543,15 +497,13 @@
             for (let i = 0; i < 95; i++) {
                 let angle = Math.random() * Math.PI * 2;
                 let speed = 5 + Math.random() * 14;
-                bombExplosionParticles.
-                    push({
+                bombExplosionParticles.push({
                     x: px, y: py, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
                     gravity: 0.05 + Math.random() * 0.06, size: 2.5 + Math.random() * 4.5, alpha: 1, decay: 0.014 + Math.random() * 0.012, styleGroup: Math.random() > 0.4 ? 'spark' : 'plasma' 
                 });
             }
-        }
-
-        window.addEventListener('keydown', e => {
+            
+            window.addEventListener('keydown', e => {
             if(!isPlaying || isBombExploding) return;
             if(e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.up = true;
             if(e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = true;
@@ -711,13 +663,14 @@
         }
 
         window.startGame = function() {
-            // 如果还未加载完，不执行
             if (startBtn.disabled) return;
 
             document.getElementById('overlay').style.display = 'none';
             document.getElementById('special-popup').style.display = 'none';
+            
             if (currentDeviceMode === 'mobile') { document.getElementById('mobile-controller').style.display = 'flex'; } 
             else { document.getElementById('mobile-controller').style.display = 'none'; }
+            
             resizeCanvas();
             
             score = 0; timeLeft = 30; bullets = []; enemies = []; isBombExploding = false; bombExplosionParticles = [];
@@ -763,7 +716,6 @@
 
             const titleElement = document.getElementById('overlay-title');
             const descElement = document.getElementById('overlay-desc');
-            document.getElementById('selector-box').style.display = 'flex'; 
             titleElement.classList.remove('success-title', 'bomb-title');
 
             if (reason === 'bomb') {
@@ -783,8 +735,6 @@
             document.getElementById('overlay').style.display = 'flex';
             setTimeout(resizeCanvas, 50); 
         }
-
-        window.switchMode('mobile');
     });
 </script>
 </body>
