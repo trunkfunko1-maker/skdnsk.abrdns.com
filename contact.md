@@ -1,30 +1,31 @@
 ---
+layout: default
 title: 联系我
 ---
 
 <!-- 🔑 核心补充：引入全自动安全与暗黑主题脚本 -->
-<script src="/auth.js?v=6"></script>
+<script src="/auth.js?v=10"></script>
 
 # 联系我
 
 如果您有任何想法或建议，请通过下方页面告知我。
 
 <!-- 表单部分 -->
-<div class="contact-container" style="max-width: 600px; margin-top: 20px;">
+<div class="contact-container" style="max-width: 600px; margin-top: 20px; box-sizing: border-box;">
 <form id="contact-form" action="https://formspree.io/f/xzdoeald" method="POST">
 
 <div style="margin-bottom: 15px;">
 <label>您的邮箱:</label><br>
-<input type="text" name="contact" required style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 4px;">
+<input type="text" name="contact" required style="width: 100%; box-sizing: border-box; padding: 12px; margin-top: 5px; border-radius: 8px;">
 </div>
 
 <div style="margin-bottom: 15px;">
 <label>留言内容:</label><br>
 <!-- 🔒 已加入 resize: none; 彻底锁死右下角拖拽功能，防止排版变形 -->
-<textarea name="message" required style="width: 100%; height: 150px; padding: 10px; margin-top: 5px; border-radius: 4px; resize: none;"></textarea>
+<textarea name="message" required style="width: 100%; box-sizing: border-box; height: 150px; padding: 12px; margin-top: 5px; border-radius: 8px; resize: none;"></textarea>
 </div>
 
-<!-- 这里的按钮样式已被 auth.js 自动接管，变为精美的炫绿圆角按钮 -->
+<!-- 这里的按钮样式已被 auth.js 自动接管，变为精美的炫蓝圆角按钮 -->
 <button id="submit-btn" type="submit" style="padding: 12px 30px; font-size: 16px;">
 立即发送
 </button>
